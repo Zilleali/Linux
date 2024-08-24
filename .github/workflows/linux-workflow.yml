@@ -1,7 +1,7 @@
 name: Run Linux Job
- permissions:
-      contents: read
-      actions: write
+ # permissions:
+ #      contents: read
+ #      actions: write
 on: [push]
 
 jobs:
