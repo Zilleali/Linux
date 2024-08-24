@@ -9,9 +9,9 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read   # Only read access to repository contents
-  actions: write   # Allow actions to be written
+# permissions:
+#   contents: read   # Only read access to repository contents
+#   actions: write   # Allow actions to be written
 
 jobs:
   secure-build:
