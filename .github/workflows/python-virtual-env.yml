@@ -1,4 +1,4 @@
-name: Advanced Secure Linux Workflow
+name: Advanced Secure Linux Workflow with File Storage
 
 on:
   push:
@@ -19,17 +19,50 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install pip
-      run: |
-        apt-get update
-        apt-get install -y python3-pip
-        python3 -m pip install --upgrade pip --no-cache-dir
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
     - name: Install dependencies
       run: |
-        python3 -m pip install --no-cache-dir -r requirements.txt
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Run Dependency Security Scan
       run: |
-        python3 -m pip install --no-cache-dir safety
+        pip install safety
         safety check
+
+    - name: Run Tests
+      run: |
+        pytest
+
+    # Step 1: Generate or Modify Files
+    - name: Generate files
+      run: |
+        echo "Generated file content" > generated_file.txt
+        echo "Another file" > another_file.txt
+
+    # Step 2: Configure Git
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
+
+    # Step 3: Add Files to Git
+    - name: Add files to git
+      run: |
+        git add generated_file.txt another_file.txt
+
+    # Step 4: Commit Changes
+    - name: Commit changes
+      run: |
+        git commit -m "Add generated files"
+
+    # Step 5: Push Changes Back to Repository
+    - name: Push changes
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git push origin HEAD:main
