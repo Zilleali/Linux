@@ -1,0 +1,18 @@
+name: Run Linux Job
+
+on: [push]
+
+jobs:
+  run-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Run a command in Linux environment
+      run: |
+        echo "Running Linux commands"
+        uname -a  # Prints Linux system info
+        ls -la    # Lists files in the directory
+        # Add other Linux commands here
