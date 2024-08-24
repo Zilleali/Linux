@@ -19,20 +19,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-
-    - name: Create and activate virtual environment
+    - name: Install pip
       run: |
-        python -m venv venv
-        source venv/bin/activate
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        apt-get update
+        apt-get install -y python3-pip
+        python3 -m pip install --upgrade pip --no-cache-dir
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --no-cache-dir -r requirements.txt
 
     - name: Run Dependency Security Scan
       run: |
-        source venv/bin/activate
-        pip install safety
+        python3 -m pip install --no-cache-dir safety
         safety check
