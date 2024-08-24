@@ -1,5 +1,7 @@
 name: Run Linux Job
-
+ permissions:
+      contents: read
+      actions: write
 on: [push]
 
 jobs:
@@ -8,7 +10,10 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      # uses: actions/checkout@v2
+      uses: actions/checkout@v2.3.4
+
+      
       
     - name: Run a command in Linux environment
       run: |
@@ -16,3 +21,5 @@ jobs:
         uname -a  # Prints Linux system info
         ls -la    # Lists files in the directory
         # Add other Linux commands here
+        sudo apt update && sudo apt install -y clamav
+        sudo clamscan -r .
