@@ -1,25 +1,84 @@
-name: Run Linux Job
- # permissions:
- #      contents: read
- #      actions: write
-on: [push]
+name: Advanced Secure Linux Workflow
+
+# Trigger workflow on pushes to main and pull requests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read   # Only read access to repository contents
+  actions: write   # Allow actions to be written
 
 jobs:
-  run-linux:
+  secure-build:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      # uses: actions/checkout@v2
-      uses: actions/checkout@v2.3.4
 
-      
-      
-    - name: Run a command in Linux environment
+    container:  # Run within a Docker container for added isolation
+      image: ubuntu:22.04
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Python (if using Python for dependency management)
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # Step 3: Install dependencies securely
+    - name: Install dependencies
       run: |
-        echo "Running Linux commands"
-        uname -a  # Prints Linux system info
-        ls -la    # Lists files in the directory
-        # Add other Linux commands here
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Install dependencies from requirements file
+
+    # Step 4: Run a security scan for Python dependencies
+    - name: Run Dependency Security Scan
+      run: |
+        pip install safety
+        safety check  # Scans for known vulnerabilities in dependencies
+
+    # Step 5: Run a CodeQL static analysis scan (for code security issues)
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+    # Step 6: Run a Linux command to check system status
+    - name: Run Linux Commands
+      run: |
+        echo "Running security checks in Linux environment"
+        uname -a  # Check system info
         sudo apt update && sudo apt install -y clamav
-        sudo clamscan -r .
+        sudo clamscan -r .  # Scan for malware in the repository
+
+    # Step 7: Run tests (Example using pytest)
+    - name: Run Tests
+      run: |
+        pytest  # Run tests to ensure code integrity
+
+    # Step 8: Audit Dockerfile security (if Docker is used)
+    - name: Scan Dockerfile for vulnerabilities
+      run: |
+        sudo apt install -y hadolint
+        hadolint Dockerfile
+
+    # Step 9: Use Trivy to scan Docker images for vulnerabilities
+    - name: Docker Image Security Scan
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+        trivy image ubuntu:22.04  # Replace with your Docker image
+
+    # Step 10: Clean up environment
+    - name: Cleanup
+      run: |
+        sudo apt-get clean
+        rm -rf /tmp/*
